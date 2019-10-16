@@ -1,0 +1,33 @@
+{
+  "name": "note-app",
+  "version": "1.0.0",
+  "engines": {
+    "node": "11.13.0",
+    "npm": "6.7.0"
+  },
+  "description": "simple node.js note application",
+  "main": "index.js",
+  "scripts": {
+    "start": "node server"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "jquery": "^3.4.1",
+    "mongodb": "^3.2.7",
+    "nodemon": "^1.19.1",
+    "objectid": "^3.2.1",
+    "path": "^0.12.7",
+    "ejs": "^2.6.2",
+    "express": "^4.17.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MishaYelysieiev/step-notes.git"
+  },
+  "bugs": {
+    "url": "https://github.com/MishaYelysieiev/step-notes/issues"
+  },
+  "homepage": "https://github.com/MishaYelysieiev/step-notes#readme"
+}

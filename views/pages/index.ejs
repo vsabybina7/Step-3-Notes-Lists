@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <% include ./parts/head %>
+</head>
+<body>
+<div class="wrapper bg-light min-vh-100 d-flex flex-column justify-content-between">
+    <header class="container-fluid bg-primary d-flex py-2 justify-content-between align-items-center">
+        <a href="/" class="text-white btn"><h4 class="my-0">Note<span class="text-warning">App</span></h4></a>
+        <div class="d-flex">
+            <a href="./notes/create" class="btn btn-light mx-2" id="btn-note">Create note</a>
+            <a href="./lists/create" class="btn btn-light mx-2" id="btn-list">Create list</a>
+        </div>
+
+    </header>
+
+    <main id="main"
+          class="container-fluid d-flex flex-grow-1 align-items-start align-content-start p-4 justify-content-around justify-content-md-start row">
+        <% notes.forEach(function(note) { %>
+            <div id="<%= note._id %>" class="card bg-warning text-white m-1" style="width: 18rem;">
+                <div class="card-body">
+                    <h5 class="card-title"><%= note.Title %></h5>
+                    <p class="card-text"><%= note.Content %></p>
+                    <button data-id="<%= note._id %>" class="edit-note card-link btn edit-btn btn-success">Edit</button>
+                    <button data-id="<%= note._id %>" class="delete-note card-link btn btn-danger">Delete</button>
+                </div>
+            </div>
+        <% }); %>
+        <% lists.forEach(function(list) { %>
+            <div id="<%= list._id %>" class="card bg-info text-white m-1" style="width: 18rem;">
+                <div class="card-body">
+                    <h5 class="card-title"><%= list.Title %></h5>
+                    <% for(let key in list) { %>
+                        <% if(key !== 'Title' && key !== '_id' && key[0]!=='+'){ %>
+                        <div class="list-item-container d-flex align-items-center mb-2" data-listName="<%=key%>"><input type="checkbox" class="list-checkbox">
+                            <p class="ml-3 my-0"><%= list[`${key}`] %></p></div>
+                    <% }} %>
+                    <div class="checked-list-container border-top border-dark mb-2">
+                        <% for(let key in list) { %>
+                            <% if(key !== 'Title' && key !== '_id' && key[0]==='+'){ %>
+                            <div class="list-item-container d-flex align-items-center mb-2" data-listName="<%=key%>"><input type="checkbox" class="list-checkbox" checked>
+                                <p class="ml-3 my-0"><%= list[`${key}`] %></p></div>
+                        <% }} %>
+                    </div>
+                    <button data-id="<%= list._id %>" class="edit-list card-link btn edit-btn btn-success">Edit</button>
+                    <button data-id="<%= list._id %>" class="delete-list card-link btn btn-danger">Delete</button>
+                </div>
+            </div>
+        <% }); %>
+    </main>
+
+    <% include ./parts/footer %>
+
+</div>
+
+<% include ./parts/scripts %>
+<script>
+    $(".delete-note").on('click', function (e) {
+        e.preventDefault();
+        let id = $(this).data("id");
+        $.ajax({
+            type: "DELETE",
+            url: `/api/notes/${id}`,
+            data: id,
+            success: function (response) {
+                $(`#${id}`).remove();
+            },
+            error: function (response) {
+                console.log(response);
+            }
+        });
+    });
+    $(".delete-list").on('click', function (e) {
+        e.preventDefault();
+        let id = $(this).data("id");
+        $.ajax({
+            type: "DELETE",
+            url: `/api/lists/${id}`,
+            data: id,
+            success: function (response) {
+                $(`#${id}`).remove();
+            },
+            error: function (response) {
+                console.log(response);
+            }
+        });
+    });
+    $(".edit-note").on('click', function (e) {
+        e.preventDefault();
+        let id = $(this).data("id");
+        $.ajax({
+            type: "GET",
+            url: `/notes/${id}`,
+            success: function (response) {
+                window.location = `/notes/${id}`;
+            },
+            error: function (response) {
+                console.log(response);
+            }
+        });
+    });
+    $(".edit-list").on('click', function (e) {
+        e.preventDefault();
+        let id = $(this).data("id");
+        $.ajax({
+            type: "GET",
+            url: `/lists/${id}`,
+            success: function (response) {
+                window.location = `/lists/${id}`;
+            },
+            error: function (response) {
+                console.log(response);
+            }
+        });
+    });
+    $(document).click(function (e) {
+        if ($(e.target).hasClass('list-checkbox')) {
+            let id = e.target.closest('.card').id;
+            const item = e.target.closest('.list-item-container');
+            const dest = $(`#${id}`).find('.checked-list-container');
+            if ($(e.target).prop('checked')) {
+                dest.append(item);
+                $.ajax({
+                    type: "POST",
+                    url: `/lists/update/${id}`,
+                    data: {data: $(item).attr('data-listname')},
+                    success: function (response) {
+                        console.log('succes+')
+                    },
+                    error: function (response) {
+                        console.log(response);
+                    }
+                });
+                $(item).attr('data-listname',`+${ $(item).attr('data-listname')}`);
+            } else {
+                dest.before(item);
+                $.ajax({
+                    type: "POST",
+                    url: `/lists/update/${id}`,
+                    data: {data: $(item).attr('data-listname')},
+                    success: function (response) {
+                        console.log('succes+')
+                    },
+                    error: function (response) {
+                        console.log(response);
+                    }
+                });
+                let lisname = $(item).attr('data-listname').split('+')[1];
+                $(item).attr('data-listname',`${lisname}`);
+            }
+        }
+    })
+</script>
+</body>
+</html>

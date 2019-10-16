@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <% include ../parts/head %>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.0/css/all.css"
+          integrity="sha384-Mmxa0mLqhmOeaE8vgOSbKacftZcsNYDjQzuCOm6D02luYSzBG8vpaOykv9lFQ51Y" crossorigin="anonymous">
+</head>
+<body>
+<div class="wrapper bg-light min-vh-100 d-flex flex-column justify-content-between">
+    <header class="container-fluid bg-primary d-flex py-2 justify-content-between align-items-center">
+        <a href="/" class="text-white btn"><h4 class="my-0">Note<span class="text-warning">App</span></h4></a>
+        <div class="d-flex">
+            <a href="/" class="btn btn-warning mx-2">Go home</a>
+        </div>
+
+    </header>
+
+    <main id="main" class="container-fluid d-flex flex-grow-1 p-4">
+        <div class="container">
+            <section class="mt-5 mb-4">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-md-8 m-auto"><h1 class="display-4 text-center mb-2">Edit Todo</h1>
+                            <form action="/api/lists/<%=id%>" id="list-form">
+                                <div class="form-group"><input id="list-title" type="text"
+                                                               class="form-control form-control-lg"
+                                                               placeholder="Add Title" name="title"
+                                                               value="<%= title %>"></div>
+
+                                <% for(let key in tasks) { %>
+                                    <% if(key !== 'Title' && key !== '_id'){ %>
+                                    <div class="todos-list-item form-group d-flex justify-content-between align-items-center position-relative mb-2">
+                                        <div class="custom-control custom-checkbox pr-2">
+                                            <% if(key[0] === '+'){ %>
+                                                <input type="checkbox" class="custom-control-input"
+                                                       style="position: absolute; z-index: 1; opacity: 0; left: 2px; top: 6px;"
+                                                       checked>
+                                                <label class="custom-control-label"></label>
+                                            <% }else{ %>
+                                                <input type="checkbox" class="custom-control-input"
+                                                       style="position: absolute; z-index: 1; opacity: 0; left: 2px; top: 6px;"
+                                                       >
+                                                <label class="custom-control-label"></label>
+                                            <% } %>
+                                        </div>
+                                        <input type="text" id="<%= key%>"
+                                               class="task-item form-control form-control-lg p-0"
+                                               placeholder="List Item"
+                                               style="border-top: medium none; border-left: medium none; border-right: medium none; border-radius: 0px; box-shadow: none; background-image: none;"
+                                               value="<%= tasks[`${key}`] %>">
+                                        <button id="close-button" type="button" class="close" aria-label="Close"
+                                                style="position: absolute; top: -5px; right: 0px; outline: currentcolor none medium;">
+                                            <span aria-hidden="true">×</span></button>
+
+
+                                    </div>
+
+                                <% }} %>
+
+                                <button id="add-button" role="button" type="button" class="btn btn-warning my-3">Add
+                                    Item<i
+                                            class="fas fa-plus"
+                                            style="padding-left: 15px; color: rgb(255, 255, 255);"></i></button>
+                                <button type="submit" class="btn btn-primary btn-block">Edit list</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+    </main>
+
+    <% include ../parts/footer %>
+
+</div>
+
+<% include ../parts/scripts %>
+
+<script>
+
+    //HTML of list-item
+    let listItem = '<div class="todos-list-item form-group d-flex justify-content-between align-items-center position-relative mb-2">' +
+        '<div class="custom-control custom-checkbox pr-2">' +
+        '<input type="checkbox" class="custom-control-input" style="position: absolute; z-index: 1; opacity: 0; left: 2px; top: 6px;">' +
+        '<label class="custom-control-label"></label>' +
+        '</div>' +
+        '<input type="text" class="task-item form-control form-control-lg p-0" placeholder="List Item" style="border-top: medium none; border-left: medium none; border-right: medium none; border-radius: 0px; box-shadow: none; background-image: none;">' +
+        '<button id="close-button" type="button" class="close" aria-label="Close" style="position: absolute; top: -5px; right: 0px; outline: currentcolor none medium;">' +
+        '<span aria-hidden="true">×</span>' +
+        '</button>' +
+        '</div>';
+
+    function deleteListItem() {
+        $(".close").on("click", function () {
+            console.log('close-button works');
+            $(this).closest(".todos-list-item").remove();
+        });
+    };
+    deleteListItem()
+
+    //add new list-item on button click
+    $("#add-button").click(function () {
+        console.log('add-button works');
+        $(listItem).insertBefore("#add-button");
+        deleteListItem();
+    });
+
+    $("#list-form").submit(function (e) {
+        e.preventDefault();
+        console.log("list-form sending button works");
+        let listItems = $('.task-item');
+        let data = {
+            Title: $("#list-title").val()
+        };
+        for (let i = 0; i < listItems.length; i++) {
+            if(listItems[i].id[0]=="+"){
+                data[`+Task${i + 1}`] = listItems[i].value
+
+            }else{
+            data[`Task${i + 1}`] = listItems[i].value}
+        };
+        $.ajax({
+            type: "PUT",
+            url: $("#list-form").attr("action"),
+            data: data,
+            success: function (response) {
+                window.location = "/";
+            },
+            error: function (response) {
+                console.log(response);
+            }
+        });
+    });
+</script>
+
+</body>
+</html>
